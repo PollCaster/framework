@@ -109,7 +109,7 @@ const handleRequest = frames(async (ctx: any) => {
             ))
           : [
               <Button key={1} action="post">
-                Start Questionare by
+                Start Questionare
               </Button>,
             ]
         : [
