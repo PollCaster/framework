@@ -1,71 +1,186 @@
 "use client";
 
-import Link from "next/link";
-import type { NextPage } from "next";
-import { useAccount } from "wagmi";
-import { BugAntIcon, MagnifyingGlassIcon } from "@heroicons/react/24/outline";
-import { Address } from "~~/components/scaffold-eth";
+// @ts-nocheck
+import React, { useEffect, useState } from "react";
+import { ErrorMessage, Field, Form, Formik } from "formik";
+import * as Yup from "yup";
 
-const Home: NextPage = () => {
-  const { address: connectedAddress } = useAccount();
+// interface FormValues {
+//   userName: string;
+//   numQuestions: number;
+//   questions: Question[];
+// }
 
+// interface Question {
+//   title: string;
+//   answers: Answer[];
+// }
+
+// interface Answer {
+//   text: string;
+//   isCorrect: boolean;
+// }
+
+// const initialValues = {
+//   userName: "",
+//   numQuestions: 0,
+//   questions: [],
+// };
+
+// /**
+//  * This function defines the validation schema for the quiz generator form using Yup's schema builder.
+//  *
+//  * @returns Yup.ObjectSchema - The validation schema for the form.
+//  */
+// export const createQuestionSchema = (): Yup.ObjectSchema<FormValues> => {
+//   const questionSchema = Yup.object().shape({
+//     title: Yup.string().required("Question title is required"),
+//     answers: Yup.array(
+//       Yup.object().shape({
+//         text: Yup.string().required("Answer text is required"),
+//         isCorrect: Yup.boolean().required("Correct answer is required"),
+//       }),
+//     )
+//       .min(4, "Minimum 4 answers required")
+//       .max(10, "Maximum 10 answers allowed")
+//       .required("Question must have answers"),
+//   });
+
+//   return Yup.object().shape({
+//     userName: Yup.string().required("Username is required"),
+//     numQuestions: Yup.number()
+//       .required("Number of questions is required")
+//       .min(1, "Minimum 1 question allowed")
+//       .max(10, "Maximum 10 questions allowed")
+//       .when("numQuestions", {
+//         is: (numQuestions: number) => numQuestions > 0,
+//         // No need for of here
+//       }),
+//     questions: Yup.array().when("numQuestions", {
+//       is: (numQuestions: number) => numQuestions > 0,
+//       then: schema => schema.of(questionSchema), // Provide only questionSchema
+//     }),
+//   });
+// };
+
+interface QuizQuestion {
+  title: string;
+  answers: { text: string; isCorrect: boolean }[];
+}
+
+const initialValues: {
+  userName: string;
+  numQuestions: number;
+  questions: QuizQuestion[];
+} = {
+  userName: "",
+  numQuestions: 1,
+  questions: [],
+};
+
+const validationSchema = Yup.object().shape({
+  userName: Yup.string().required("Username is required"),
+  numQuestions: Yup.number().min(1, "Minimum 1 question").required("Number of questions is required"),
+});
+
+const QuizForm = () => {
+  // useEffect(() => {
+  //   // Code to execute when values change
+  // }, [values]);
   return (
-    <>
-      <div className="flex items-center flex-col flex-grow pt-10">
-        <div className="px-5">
-          <h1 className="text-center">
-            <span className="block text-2xl mb-2">Welcome to</span>
-            <span className="block text-4xl font-bold">Scaffold-ETH 2</span>
-          </h1>
-          <div className="flex justify-center items-center space-x-2">
-            <p className="my-2 font-medium">Connected Address:</p>
-            <Address address={connectedAddress} />
-          </div>
-          <p className="text-center text-lg">
-            Get started by editing{" "}
-            <code className="italic bg-base-300 text-base font-bold max-w-full break-words break-all inline-block">
-              packages/nextjs/app/page.tsx
-            </code>
-          </p>
-          <p className="text-center text-lg">
-            Edit your smart contract{" "}
-            <code className="italic bg-base-300 text-base font-bold max-w-full break-words break-all inline-block">
-              YourContract.sol
-            </code>{" "}
-            in{" "}
-            <code className="italic bg-base-300 text-base font-bold max-w-full break-words break-all inline-block">
-              packages/hardhat/contracts
-            </code>
-          </p>
-        </div>
+    <div>
+      <Formik
+        initialValues={initialValues}
+        validationSchema={validationSchema}
+        onSubmit={values => console.log(values)}
+        enableReintialize={true}
+      >
+        {({ values, handleChange }) => (
+          <Form>
+            <h2>Quiz Generator</h2>
+            <Field type="text" name="userName" placeholder="Enter Username" />
+            <ErrorMessage name="userName" component="div" className="error" />
+            <Field type="number" name="numQuestions" placeholder="Number of Questions" />
+            <ErrorMessage name="numQuestions" component="div" className="error" />
 
-        <div className="flex-grow bg-base-300 w-full mt-16 px-8 py-12">
-          <div className="flex justify-center items-center gap-12 flex-col sm:flex-row">
-            <div className="flex flex-col bg-base-100 px-10 py-10 text-center items-center max-w-xs rounded-3xl">
-              <BugAntIcon className="h-8 w-8 fill-secondary" />
-              <p>
-                Tinker with your smart contract using the{" "}
-                <Link href="/debug" passHref className="link">
-                  Debug Contracts
-                </Link>{" "}
-                tab.
-              </p>
+            <div>{JSON.stringify(values)}</div>
+
+            {/* {({ values, handleChange }) => ( */}
+            <div>
+              {Array.from({ length: values.numQuestions }, (_, index) => (
+                <div key={index}>
+                  <h3>Question {index + 1}</h3>
+                  <Field type="text" name={`questions[${index}].title`} placeholder="Enter Question Title" />
+                  <ErrorMessage name={`questions[${index}].title`} component="div" className="error" />
+                  <div>
+                    <h4>Answers</h4>
+                    {Array.from({ length: 4 }, (_, answerIndex) => (
+                      <div key={answerIndex}>
+                        <input
+                          type="text"
+                          name={`questions[${index}].answers[${answerIndex}].text`}
+                          placeholder={`Answer ${answerIndex + 1}`}
+                          onChange={e =>
+                            handleChange({
+                              target: {
+                                ...e.target,
+                                name: `questions[${index}].answers[${answerIndex}].text`,
+                              },
+                            })
+                          }
+                        />
+                        <input
+                          type="radio"
+                          name={`questions[${index}].isCorrect`}
+                          value={answerIndex}
+                          onChange={handleChange}
+                        />
+                        <label htmlFor={`questions[${index}].answers[${answerIndex}].isCorrect`}>Correct Answer</label>
+                      </div>
+                    ))}
+                    {/* {Array.from({ length: 4 }, (_, answerIndex) => (
+                      <div key={answerIndex}>
+                        <input
+                          type="text"
+                          name={`questions[${index}].answers[${answerIndex}].text`}
+                          placeholder={`Answer ${answerIndex + 1}`}
+                          onChange={e =>
+                            handleChange({
+                              target: {
+                                ...e.target,
+                                name: `questions[${index}].answers[${answerIndex}].text`,
+                              },
+                            })
+                          }
+                        />
+                        <Field
+                          type="radio"
+                          name={`questions[${index}].answers[${answerIndex}].isCorrect`}
+                          value={answerIndex}
+                          onChange={e =>
+                            handleChange({
+                              target: {
+                                ...e.target,
+                                name: `questions[${index}].answers[${answerIndex}].isCorrect`,
+                              },
+                            })
+                          }
+                        />
+                        <label htmlFor={`questions[${index}].answers[${answerIndex}].isCorrect`}>Correct Answer</label>
+                      </div>
+                    ))} */}
+                  </div>
+                </div>
+              ))}
             </div>
-            <div className="flex flex-col bg-base-100 px-10 py-10 text-center items-center max-w-xs rounded-3xl">
-              <MagnifyingGlassIcon className="h-8 w-8 fill-secondary" />
-              <p>
-                Explore your local transactions with the{" "}
-                <Link href="/blockexplorer" passHref className="link">
-                  Block Explorer
-                </Link>{" "}
-                tab.
-              </p>
-            </div>
-          </div>
-        </div>
-      </div>
-    </>
+            {/* )} */}
+
+            <button type="submit">Generate Quiz</button>
+          </Form>
+        )}
+      </Formik>
+    </div>
   );
 };
 
-export default Home;
+export default QuizForm;

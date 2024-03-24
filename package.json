@@ -38,5 +38,13 @@
   "devDependencies": {
     "husky": "^8.0.1",
     "lint-staged": "^13.0.3"
+  },
+  "dependencies": {
+    "@quillforms/blocks": "^4.1.4",
+    "@quillforms/react-renderer-utils": "^5.10.0",
+    "@quillforms/renderer-core": "^5.8.0",
+    "@quillforms/types": "^3.0.17",
+    "formik": "^2.4.5",
+    "yup": "^1.4.0"
   }
 }
