@@ -8,7 +8,7 @@ const Video = () => {
       <div className="w-full h-screen mx-auto overflow-hidden rounded-2xl flex flex-col justify-around">
         <div
           onClick={() => setPlayVideo(!playVideo)}
-          className="flex flex-row mx-auto justify-around relative cursor-pointer lg:mb-20 w-3/5 h-1/2"
+          className="flex flex-row mx-auto justify-around relative cursor-pointer lg:mb-20 w-4/5 lg:w-3/5 h-1/2"
         >
           {!playVideo && (
             <button className=" inset-auto w-16 h-16 text-white lg:w-28 lg:h-28">

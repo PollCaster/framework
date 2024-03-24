@@ -59,9 +59,10 @@ const Dashboard = () => {
       console.log("Current Unix Timestamp (seconds):", currentUnixTimestamp);
       const newFrameMetadata = {
         frame: {
+          timestamp: currentUnixTimestamp,
+          deadline: currentUnixTimestamp + 1200000,
           farcasterId: initialData.farcasterId,
           name: initialData.userName || "Default Poll",
-          timestamp: currentUnixTimestamp,
           pages: initialData.questions.map(question => ({
             question: question.answers[0].text,
             options: question.answers.map(answer => answer.text),
