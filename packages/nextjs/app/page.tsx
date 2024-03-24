@@ -1,98 +1,85 @@
 "use client";
 
-import React, { useState } from "react";
+// import React, { useEffect, useState } from "react";
 // import Link from "next/link";
 import axios from "axios";
+import { ErrorMessage, Field, Form, Formik } from "formik";
 import type { NextPage } from "next";
 import { useAccount } from "wagmi";
+import * as Yup from "yup";
 // import { BugAntIcon, MagnifyingGlassIcon } from "@heroicons/react/24/outline";
 // import { Address } from "~~/components/scaffold-eth";
 import { RainbowKitCustomConnectButton } from "~~/components/scaffold-eth";
 
-interface FramePage {
-  question: string;
-  options: string[];
+interface QuizQuestion {
+  title: string;
+  answers: { text: string; isCorrect: boolean }[];
 }
+
+interface QuizValues {
+  userName: string;
+  numQuestions: number;
+  questions: QuizQuestion[];
+}
+
+const initialValues: {
+  userName: string;
+  numQuestions: number;
+  questions: QuizQuestion[];
+} = {
+  userName: "",
+  numQuestions: 1,
+  questions: [],
+};
+
+const validationSchema = Yup.object().shape({
+  userName: Yup.string().required("Username is required"),
+  numQuestions: Yup.number().min(1, "Minimum 1 question").required("Number of questions is required"),
+});
+
+// interface FramePage {
+//   question: string;
+//   options: string[];
+// }
 
 // interface FrameData {
 //   frame: {
 //     name: string;
 //     pages: FramePage[];
+//     [key: string]: any;
 //   };
 //   owner: string;
 // }
-
-interface FrameData {
-  frame: {
-    name: string;
-    pages: FramePage[];
-    [key: string]: any;
-  };
-  owner: string;
-}
-
-// const frameData = {
-//   frame: {
-//     name: "Test",
-//     pages: [
-//       {
-//         question: "What is your name?",
-//         options: ["Alice", "Bob", "Charlie"],
-//       },
-//       {
-//         question: "What is your favorite color?",
-//         options: ["Red", "Green", "Blue"],
-//       },
-//       {
-//         question: "What is your favorite food?",
-//         options: ["Pizza", "Pasta", "Salad"],
-//       },
-//     ],
-//   },
-//   owner: "0x99ccAa5a770051C6ca30709E7c73204c7b10b8d9",
-// };
 
 const apiUrl = `http://${process.env.NEXT_PUBLIC_APP_API_URL}/frames`;
 
 const Home: NextPage = () => {
   const { address: connectedAddress } = useAccount();
 
-  const [frameData, setFrameData] = useState<FrameData>({
-    frame: {
-      name: "Test",
-      pages: [
-        { question: "What is your name?", options: ["Alice", "Bob", "Charlie"] },
-        { question: "What is your favorite color?", options: ["Red", "Green", "Blue"] },
-        { question: "What is your favorite food?", options: ["Pizza", "Pasta", "Salad"] },
-      ],
-    },
-    owner: "0x99ccAa5a770051C6ca30709E7c73204c7b10b8d9",
-  });
+  // const [frameData, setFrameData] = useState<FrameData>({
+  //   frame: {
+  //     name: "Test",
+  //     pages: [
+  //       { question: "What is your name?", options: ["Alice", "Bob", "Charlie"] },
+  //     ],
+  //   },
+  //   owner: "0x99ccAa5a770051C6ca30709E7c73204c7b10b8d9",
+  // });
 
-  const handleChange = (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, value } = event.target;
-
-    // Update frameData based on the changed field
-    setFrameData(prevData => {
-      const updatedFrameData = { ...prevData };
-      const path = name.split("."); // Split name to access nested properties
-
-      // Update nested properties using reduce
-      updatedFrameData.frame = path.reduce((acc, prop, index, arr) => {
-        if (index === arr.length - 1) {
-          return { ...acc, [prop]: value }; // Update final property
-        }
-        return acc[prop]; // Traverse nested objects
-      }, updatedFrameData.frame); // Initial accumulator
-
-      return updatedFrameData;
-    });
-  };
-
-  const createFrame = async () => {
+  const createFrame = async (initialData: QuizValues) => {
     try {
       console.log(apiUrl);
-      const response = await axios.post(apiUrl, frameData);
+      const newFrameMetadata = {
+        frame: {
+          name: initialData.userName || "Default Poll",
+          pages: initialData.questions.map(question => ({
+            question: question.answers[0].text,
+            options: question.answers.map(answer => answer.text),
+          })),
+        },
+        owner: connectedAddress,
+      };
+      const response = await axios.post(apiUrl, newFrameMetadata);
       console.log("Frame created successfully:", response.data);
     } catch (error) {
       console.error("Error creating frame:", error);
@@ -112,10 +99,81 @@ const Home: NextPage = () => {
               {apiUrl}
             </div>
             <div className="text-center text-lg mt-4">
-              <h2 className="text-xl">Create Frame Poll</h2>
+              <h2 className="text-xl">Create Poll Frame</h2>
               <div className="flex flex-col border border-white px-4 py-2 rounded-xl">
-                <form className="flex flex-col justify-evenly">
-                  {/* Form fields to update frameData properties */}
+                <div>
+                  <Formik
+                    initialValues={initialValues}
+                    validationSchema={validationSchema}
+                    onSubmit={values => console.log(values)}
+                    enableReintialize={true}
+                  >
+                    {({ values, handleChange }) => (
+                      <Form>
+                        <h2>Quiz Generator</h2>
+                        <Field type="text" name="userName" placeholder="Enter Username" />
+                        <ErrorMessage name="userName" component="div" className="error" />
+                        <Field type="number" name="numQuestions" placeholder="Number of Questions" />
+                        <ErrorMessage name="numQuestions" component="div" className="error" />
+
+                        <div>{JSON.stringify(values)}</div>
+
+                        <div>
+                          {Array.from({ length: values.numQuestions }, (_, index) => (
+                            <div key={index} className="my-6">
+                              <h3>Question {index + 1}</h3>
+                              <Field
+                                type="text"
+                                name={`questions[${index}].title`}
+                                placeholder="Enter Question Title"
+                              />
+                              <ErrorMessage name={`questions[${index}].title`} component="div" className="error" />
+                              <div>
+                                <h4>Answers</h4>
+                                {Array.from({ length: 4 }, (_, answerIndex) => (
+                                  <div key={answerIndex}>
+                                    <input
+                                      type="text"
+                                      name={`questions[${index}].answers[${answerIndex}].text`}
+                                      placeholder={`Answer ${answerIndex + 1}`}
+                                      onChange={e =>
+                                        handleChange({
+                                          target: {
+                                            ...e.target,
+                                            name: `questions[${index}].answers[${answerIndex}].text`,
+                                          },
+                                        })
+                                      }
+                                    />
+                                    <input
+                                      type="radio"
+                                      name={`questions[${index}].isCorrect`}
+                                      value={answerIndex}
+                                      onChange={handleChange}
+                                    />
+                                    <label htmlFor={`questions[${index}].answers[${answerIndex}].isCorrect`}>
+                                      Correct Answer
+                                    </label>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+
+                        {/* <button type="submit">Generate Quiz</button> */}
+                        <button
+                          type="button"
+                          className="bg-secondary rounded-xl px-2 py-1 font-bold my-2"
+                          onClick={() => createFrame(values)}
+                        >
+                          Create Frame
+                        </button>
+                      </Form>
+                    )}
+                  </Formik>
+                </div>
+                {/* <form className="flex flex-col justify-evenly">
                   <label htmlFor="frameName">Frame Name:</label>
                   <input
                     type="text"
@@ -124,11 +182,10 @@ const Home: NextPage = () => {
                     value={frameData.frame.name}
                     onChange={handleChange}
                   />
-                  {/* Add similar fields for each page and its properties (question, options) */}
                   <button type="button" className="bg-secondary rounded-xl px-2 py-1 font-bold" onClick={createFrame}>
                     Create Frame
                   </button>
-                </form>
+                </form> */}
               </div>
             </div>
           </div>
