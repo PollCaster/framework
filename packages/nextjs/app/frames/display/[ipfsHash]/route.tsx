@@ -44,6 +44,7 @@ async function get(url: string): Promise<IFrame> {
 
 interface IFrame {
   name: string;
+  // owner: string; ToDo
   pages: {
     question: string;
     options: string[];
@@ -85,7 +86,7 @@ const handleRequest = frames(async (ctx: any) => {
           ? state
             ? frame.pages[pageIndex].question
             : `Welcome to the "${frame.name}" Questionare`
-          : "Thank you for completing the Questionare"}
+          : `Thank you for completing the Questionare "${frame?.name}"`}
       </div>
     ),
     buttons:
@@ -108,10 +109,14 @@ const handleRequest = frames(async (ctx: any) => {
             ))
           : [
               <Button key={1} action="post">
-                Start Questionare
+                Start Questionare by
               </Button>,
             ]
-        : [],
+        : [
+            <Button action="link" target="https://pollcaster-framework.vercel.app/">
+              Create Your Own Quiz
+            </Button>,
+          ],
   };
 });
 

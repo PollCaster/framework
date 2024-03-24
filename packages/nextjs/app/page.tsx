@@ -17,16 +17,14 @@ interface QuizQuestion {
 }
 
 interface QuizValues {
+  farcasterId: string;
   userName: string;
   numQuestions: number;
   questions: QuizQuestion[];
 }
 
-const initialValues: {
-  userName: string;
-  numQuestions: number;
-  questions: QuizQuestion[];
-} = {
+const initialValues: QuizValues = {
+  farcasterId: "",
   userName: "",
   numQuestions: 1,
   questions: [],
@@ -71,6 +69,7 @@ const Home: NextPage = () => {
       console.log(apiUrl);
       const newFrameMetadata = {
         frame: {
+          farcasterId: initialData.farcasterId,
           name: initialData.userName || "Default Poll",
           pages: initialData.questions.map(question => ({
             question: question.answers[0].text,
@@ -111,6 +110,7 @@ const Home: NextPage = () => {
                     {({ values, handleChange }) => (
                       <Form>
                         <h2>Quiz Generator</h2>
+                        <Field type="text" name="farcasterId" placeholder="Farcaster Id" />
                         <Field type="text" name="userName" placeholder="Enter Username" />
                         <ErrorMessage name="userName" component="div" className="error" />
                         <Field type="number" name="numQuestions" placeholder="Number of Questions" />
