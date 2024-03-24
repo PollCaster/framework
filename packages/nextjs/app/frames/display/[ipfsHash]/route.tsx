@@ -46,6 +46,7 @@ interface IFrame {
   name: string;
   // owner: string; ToDo
   pages: {
+    image?: string;
     question: string;
     options: string[];
     correctOption: number;
@@ -80,7 +81,9 @@ const handleRequest = frames(async (ctx: any) => {
   console.log(state);
 
   return {
-    image: (
+    image: frame.pages[pageIndex]?.image ? (
+      frame.pages[pageIndex]?.image || "https://picsum.photos/seed/frames.js/1146/600"
+    ) : (
       <div tw="w-full h-full bg-slate-700 text-white justify-center flex items-center">
         {pageIndex !== frame.pages.length
           ? state
@@ -92,28 +95,56 @@ const handleRequest = frames(async (ctx: any) => {
     buttons:
       pageIndex !== frame.pages.length
         ? state
-          ? frame.pages[pageIndex].options.map((option, key) => (
-              <Button
-                key={key}
-                target={{
-                  pathname: ctx.url.pathname,
-                  query: {
-                    pageIndex: pageIndex + 1,
-                    answers: JSON.stringify([...prevAnswers, key]),
-                  },
-                }}
-                action="post"
-              >
-                {option}
-              </Button>
-            ))
+          ? (!frame.pages[pageIndex]?.options || !frame.pages[pageIndex]?.options.length) &&
+            pageIndex !== frame.pages.length
+            ? [
+                <Button
+                  key={1}
+                  target={{
+                    pathname: ctx.url.pathname,
+                    query: {
+                      pageIndex: pageIndex - 1,
+                    },
+                  }}
+                  action="post"
+                >
+                  Previous
+                </Button>,
+                <Button
+                  key={2}
+                  target={{
+                    pathname: ctx.url.pathname,
+                    query: {
+                      pageIndex: pageIndex + 1,
+                    },
+                  }}
+                  action="post"
+                >
+                  Next
+                </Button>,
+              ]
+            : frame.pages[pageIndex].options.map((option, key) => (
+                <Button
+                  key={key}
+                  target={{
+                    pathname: ctx.url.pathname,
+                    query: {
+                      pageIndex: pageIndex + 1,
+                      answers: JSON.stringify([...prevAnswers, key]),
+                    },
+                  }}
+                  action="post"
+                >
+                  {option}
+                </Button>
+              ))
           : [
               <Button key={1} action="post">
                 Start Questionare
               </Button>,
             ]
         : [
-            <Button action="link" target="https://pollcaster-framework.vercel.app/">
+            <Button action="link" target={process.env.NEXT_PUBLIC_APP_API_URL}>
               Create Your Own Quiz
             </Button>,
           ],

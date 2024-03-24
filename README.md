@@ -1,7 +1,7 @@
 # 🌊 Pollcaster
 
 <p align="center">
-  <img src="packages/nextjs/public/OIG1.FHfNT-logo.png" width="350">
+  <img src="packages/nextjs/public/OIG1.FHfNT-logo-filled.png" width="350">
 </p>
 
 <div align="center">
