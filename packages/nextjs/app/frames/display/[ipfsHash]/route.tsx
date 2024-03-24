@@ -6,44 +6,44 @@ import { createWalletClient, getContract, http } from "viem";
 import { hardhat } from "viem/chains";
 import deployedContracts from "~~/contracts/deployedContracts";
 
-// function getTimeAgo(unixTimestamp: any) {
-//   const timestamp = unixTimestamp * 1000; // Convert Unix timestamp to milliseconds
-//   const now = Date.now();
-//   let seconds = Math.floor((timestamp - now) / 1000);
-//   const isFuture = seconds > 0;
-//   if (!isFuture) seconds = Math.floor((now - timestamp) / 1000);
-//   const minutes = Math.floor(seconds / 60);
-//   const hours = Math.floor(minutes / 60);
-//   const days = Math.floor(hours / 24);
+function getTimeAgo(unixTimestamp: any) {
+  const timestamp = unixTimestamp * 1000; // Convert Unix timestamp to milliseconds
+  const now = Date.now();
+  let seconds = Math.floor((timestamp - now) / 1000);
+  const isFuture = seconds > 0;
+  if (!isFuture) seconds = Math.floor((now - timestamp) / 1000);
+  const minutes = Math.floor(seconds / 60);
+  const hours = Math.floor(minutes / 60);
+  const days = Math.floor(hours / 24);
 
-//   let timeAgoString;
-//   // const isFuture = seconds > 0;
+  let timeAgoString;
+  // const isFuture = seconds > 0;
 
-//   if (isFuture) {
-//     if (days > 0) {
-//       timeAgoString = days === 1 ? `in ${days} day` : `in ${days} days`;
-//     } else if (hours > 0) {
-//       timeAgoString = hours === 1 ? `in ${hours} hour` : `in ${hours} hours`;
-//     } else if (minutes > 0) {
-//       timeAgoString = minutes === 1 ? `in ${minutes} minute` : `in ${minutes} minutes`;
-//     } else {
-//       timeAgoString = "in seconds"; // Handle cases very close to now (within seconds)
-//     }
-//   } else {
-//     // Logic for past dates remains the same
-//     if (days > 0) {
-//       timeAgoString = days === 1 ? `${days} day ago` : `${days} days ago`;
-//     } else if (hours > 0) {
-//       timeAgoString = hours === 1 ? `${hours} hour ago` : `${hours} hours ago`;
-//     } else if (minutes > 0) {
-//       timeAgoString = minutes === 1 ? `${minutes} minute ago` : `${minutes} minutes ago`;
-//     } else {
-//       timeAgoString = "just now";
-//     }
-//   }
+  if (isFuture) {
+    if (days > 0) {
+      timeAgoString = days === 1 ? `in ${days} day` : `in ${days} days`;
+    } else if (hours > 0) {
+      timeAgoString = hours === 1 ? `in ${hours} hour` : `in ${hours} hours`;
+    } else if (minutes > 0) {
+      timeAgoString = minutes === 1 ? `in ${minutes} minute` : `in ${minutes} minutes`;
+    } else {
+      timeAgoString = "in seconds"; // Handle cases very close to now (within seconds)
+    }
+  } else {
+    // Logic for past dates remains the same
+    if (days > 0) {
+      timeAgoString = days === 1 ? `${days} day ago` : `${days} days ago`;
+    } else if (hours > 0) {
+      timeAgoString = hours === 1 ? `${hours} hour ago` : `${hours} hours ago`;
+    } else if (minutes > 0) {
+      timeAgoString = minutes === 1 ? `${minutes} minute ago` : `${minutes} minutes ago`;
+    } else {
+      timeAgoString = "just now";
+    }
+  }
 
-//   return timeAgoString;
-// }
+  return timeAgoString;
+}
 
 const frames = createFrames({
   initialState: {
@@ -213,12 +213,21 @@ const handleRequest = frames(async (ctx: any) => {
       frame.pages[pageIndex]?.image ? (
         frame.pages[pageIndex]?.image || "https://picsum.photos/seed/frames.js/1146/600"
       ) : (
-        <div tw="w-full h-full bg-slate-700 text-white justify-center flex items-center">
-          {pageIndex !== frame.pages.length
-            ? state
-              ? frame.pages[pageIndex].question
-              : `Welcome to the "${frame.name}" Questionare}`
-            : `Thank you for completing the Questionare "${frame?.name}"`}
+        <div tw="w-full h-full bg-slate-700 text-white justify-center flex items-center flex-col">
+          {pageIndex !== frame.pages.length ? (
+            state ? (
+              frame.pages[pageIndex].question
+            ) : (
+              <>
+                <p>
+                  Welcome to the &quot;{frame.name}&quot; Questionare (Closes{" "}
+                  {getTimeAgo((frame.timestamp || (new Date().getTime() / 1000) | 0) + 86400)})
+                </p>
+              </>
+            )
+          ) : (
+            `Thank you for completing the Questionare "${frame?.name}"`
+          )}
         </div>
       ),
     buttons:
