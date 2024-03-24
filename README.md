@@ -1,7 +1,10 @@
 # 🌊 Pollcaster
 
-<div align="center">
+<p align="center">
   <img src="packages/nextjs/public/OIG1.FHfNT-logo.png" width="350">
+</p>
+
+<div align="center">
   <a href="https://docs.scaffoldeth.io">Deck</a> |
   <a href="https://scaffoldeth.io">Dashboard Live Demo</a>
   <a href="https://scaffoldeth.io">Frame Example</a>
