@@ -21,6 +21,9 @@ Platform for no-code creation and management of Farcaster Frames, including but 
 
 Developed using `NEXT`, `frames.js`, `Pinata` and compatible with `Open Frames` standard.
 
+# Base Sepolia Contract Address
+[0x4828256e2aD7796528A5Ee0A6378ADa8B159D794](https://sepolia.basescan.org/address/0x4828256e2aD7796528A5Ee0A6378ADa8B159D794)
+
 ## Requirements
 
 Before you begin, you need to install the following tools:
