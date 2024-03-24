@@ -1,4 +1,4 @@
-# 🌊 Pollcaster
+# 🌊 PollCaster
 
 <p align="center">
   <img src="packages/nextjs/public/OIG1.FHfNT-logo-filled.png" width="350">
@@ -6,18 +6,20 @@
 
 <div align="center">
   <a href="https://docs.scaffoldeth.io">Deck</a> |
-  <a href="https://scaffoldeth.io">Dashboard Live Demo</a>
-  <a href="https://scaffoldeth.io">Frame Example</a>
-  <a href="https://scaffoldeth.io">Demo Video</a>
+  <a href="https://pollcaster-frame.vercel.app">Dashboard Live Demo</a> |
+  <a href="https://scaffoldeth.io">Frame Example</a> |
+  <a href="https://scaffoldeth.io">Demo Video</a> 
 </div>
 
 ## Overview
 
-Open-source platform for no-code creation and management of Farcaster Frames, including but not limited to:
+Platform for no-code creation and management of Farcaster Frames, including but not limited to:
 
 - Polls
 - Quizzes
 - 'Story'-like frames including few pages with interactive images and text
+
+Developed using `NEXT`, `frames.js`, `Pinata` and compatible with `Open Frames` standard.
 
 ## Requirements
 

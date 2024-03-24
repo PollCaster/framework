@@ -75,6 +75,9 @@ module.exports = {
   },
   theme: {
     extend: {
+      spacing: {
+        "1/3": "33.33%",
+      },
       boxShadow: {
         center: "0 0 12px -2px rgb(0 0 0 / 0.05)",
       },

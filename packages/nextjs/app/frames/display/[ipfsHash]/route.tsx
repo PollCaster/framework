@@ -47,6 +47,7 @@ interface IFrame {
   // owner: string; ToDo
   pages: {
     image?: string;
+    timestamp: number;
     question: string;
     options: string[];
     correctOption: number;
@@ -81,6 +82,18 @@ const handleRequest = frames(async (ctx: any) => {
   console.log(state);
 
   return {
+    accepts: [
+      {
+        id: "farcaster",
+        version: "vNext",
+      },
+      {
+        id: "xmtp",
+        version: "vNext",
+      },
+    ],
+    ogImage:
+      "https://turquoise-blank-manatee-120.mypinata.cloud/ipfs/Qmdru8wSLZKgeXeFdxeZLNRxLr26MV2NiXiEZWC8CwE3TQ/0.png", // Not sure if it's needed or frames.js is already handling that
     image: frame.pages[pageIndex]?.image ? (
       frame.pages[pageIndex]?.image || "https://picsum.photos/seed/frames.js/1146/600"
     ) : (
