@@ -18,8 +18,19 @@ Platform for no-code creation and management of Farcaster Frames, including but 
 - Polls
 - Quizzes
 - 'Story'-like frames including few pages with interactive images and text
-
+- 'Time-gated' content - frames are only available for a day, after a deadline passes it's no longer possible to view / interact with Frame's content
+- Base chain interaction - configuration for user Frame polls is stored in the smart contracts deployed to Base Sepolia network in order to provide more transparency
 Developed using `NEXT`, `frames.js`, `Pinata` and compatible with `Open Frames` standard.
+
+### Developed using NEXT, frames.js, Pinata and compatible with Open Frames standard.
+
+- User wanting to create a Frame Poll visits the web app url. The web app prompts user to input details for the poll and returns IPFS hash from the backend API which is calling Pinata API. 
+
+- Dynamic frame generation happens using frame.js NEXT.js routing.
+
+- The details of the Frame Polls for each user and poll votes from users are stored in the smart contracts written in Solidity.
+
+- The smart contracts for configuration of user frames and metadata for frames have been deployed to the Base Sepolia chain.
 
 # Base Sepolia Contract Address
 [0x4828256e2aD7796528A5Ee0A6378ADa8B159D794](https://sepolia.basescan.org/address/0x4828256e2aD7796528A5Ee0A6378ADa8B159D794)
