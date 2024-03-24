@@ -36,10 +36,13 @@
   },
   "packageManager": "yarn@3.2.3",
   "devDependencies": {
+    "@quillforms/react-renderer-utils": "^5.10.0",
     "husky": "^8.0.1",
     "lint-staged": "^13.0.3"
   },
   "dependencies": {
+    "@quillforms/blocks": "^4.1.4",
+    "@quillforms/renderer-core": "^5.8.0",
     "formik": "^2.4.5",
     "yup": "^1.4.0"
   }
