@@ -89,9 +89,10 @@ const wallet = createWalletClient({
   chain: hardhat,
   transport: http(),
 });
+
 const contract = getContract({
-  abi: deployedContracts[31337].PollResults.abi,
-  address: deployedContracts[31337].PollResults.address,
+  abi: deployedContracts[84532].PollResults.abi,
+  address: deployedContracts[84532].PollResults.address,
   walletClient: wallet,
   publicClient: wallet,
 });
