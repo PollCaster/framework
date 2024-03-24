@@ -3,7 +3,7 @@ import axios from "axios";
 /* eslint-disable react/jsx-key */
 import { Button, createFrames } from "frames.js/next";
 import { createWalletClient, getContract, http } from "viem";
-import { hardhat } from "viem/chains";
+import { baseSepolia } from "viem/chains";
 import deployedContracts from "~~/contracts/deployedContracts";
 
 function getTimeAgo(unixTimestamp: any) {
@@ -86,7 +86,7 @@ async function get(url: string): Promise<IFrame> {
 
 const wallet = createWalletClient({
   key: process.env.SIGNER_PRIVATE_KEY,
-  chain: hardhat,
+  chain: baseSepolia,
   transport: http(),
 });
 
