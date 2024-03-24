@@ -2,6 +2,9 @@ import axios from "axios";
 
 /* eslint-disable react/jsx-key */
 import { Button, createFrames } from "frames.js/next";
+import { createWalletClient, getContract, http } from "viem";
+import { hardhat } from "viem/chains";
+import deployedContracts from "~~/contracts/deployedContracts";
 
 // function getTimeAgo(unixTimestamp: any) {
 //   const timestamp = unixTimestamp * 1000; // Convert Unix timestamp to milliseconds
@@ -81,6 +84,18 @@ async function get(url: string): Promise<IFrame> {
 //   ],
 // };
 
+const wallet = createWalletClient({
+  key: process.env.SIGNER_PRIVATE_KEY,
+  chain: hardhat,
+  transport: http(),
+});
+const contract = getContract({
+  abi: deployedContracts[31337].PollResults.abi,
+  address: deployedContracts[31337].PollResults.address,
+  walletClient: wallet,
+  publicClient: wallet,
+});
+
 interface IFrame {
   name: string;
   // owner: string; ToDo
@@ -95,8 +110,8 @@ interface IFrame {
 }
 
 const handleRequest = frames(async (ctx: any) => {
-  const ipfsHash = ctx.url.href.split("/").slice(-1)[0];
-  const frame = await get(`https://gateway.pinata.cloud/ipfs/${ipfsHash}`);
+  const ipfsHash = ctx.url.href.split("/").slice(-1)[0].split("?")[0];
+  const frame = await get(`https://turquoise-hilarious-prawn-9.mypinata.cloud/ipfs/${ipfsHash}`);
   console.log(frame);
 
   if (
@@ -114,12 +129,55 @@ const handleRequest = frames(async (ctx: any) => {
     };
   }
 
+  let pollSubmitted = false;
+  let score = [0, 0];
+  if (ctx.message) {
+    pollSubmitted = await contract.read.isPollSubmitted([ctx.message.requesterFid, ipfsHash]);
+    const [n, d] = await contract.read.getResult([ctx.message.requesterFid, ipfsHash]);
+    score = [Number(n), Number(d)];
+  }
+
+  if (pollSubmitted) {
+    return {
+      accepts: [
+        {
+          id: "farcaster",
+          version: "vNext",
+        },
+        {
+          id: "xmtp",
+          version: "vNext",
+        },
+      ],
+      image: (
+        <div tw="w-full h-full bg-slate-700 text-white justify-center flex flex-col items-center">
+          <h1>{frame.name}</h1>
+          <h2>
+            Your Score: {score[0]}/{score[1]} ({((100 * score[0]) / score[1]).toFixed(2)}%)
+          </h2>
+        </div>
+      ),
+      buttons: [
+        <Button action="link" target={process.env.NEXT_PUBLIC_APP_API_URL}>
+          Create Your Own Quiz
+        </Button>,
+      ],
+    };
+  }
+
   const pageIndex = Number(ctx.searchParams.pageIndex || 0);
   const prevAnswers = JSON.parse(ctx.searchParams.answers || "[]");
   console.log(pageIndex, prevAnswers);
 
   const state = typeof ctx.message?.state === "string" ? JSON.parse(ctx.message?.state || "{}") : ctx.message?.state;
   console.log(state);
+
+  console.log(ctx.message?.requesterFid, ipfsHash, prevAnswers);
+  if (pageIndex === frame.pages.length) {
+    await contract.write.submitAnswer([ctx.message?.requesterFid, ipfsHash, prevAnswers], {
+      account: (await wallet.getAddresses())[0],
+    });
+  }
 
   // const username = "Farcaster User";
   // const postedTime = new Date().toLocaleString(); // Replace with actual post time
@@ -201,7 +259,7 @@ const handleRequest = frames(async (ctx: any) => {
                     pathname: ctx.url.pathname,
                     query: {
                       pageIndex: pageIndex + 1,
-                      answers: JSON.stringify([...prevAnswers, key]),
+                      answers: JSON.stringify([...prevAnswers, option]),
                     },
                   }}
                   action="post"
