@@ -1,14 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
 import PinataClient from "@pinata/sdk";
 import { createWalletClient, getContract, http } from "viem";
-import { hardhat } from "viem/chains";
+import { baseSepolia } from "viem/chains";
 import deployedContracts from "~~/contracts/deployedContracts";
 
 const pinata = new PinataClient(process.env.PINATA_API_KEY, process.env.PINATA_API_SECRET);
 
 const wallet = createWalletClient({
   key: process.env.SIGNER_PRIVATE_KEY,
-  chain: hardhat,
+  chain: baseSepolia,
   transport: http(),
 });
 const contract = getContract({
