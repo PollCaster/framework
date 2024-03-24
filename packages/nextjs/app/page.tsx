@@ -1,68 +1,145 @@
 "use client";
 
-import Link from "next/link";
+import React, { useState } from "react";
+// import Link from "next/link";
+import axios from "axios";
 import type { NextPage } from "next";
 import { useAccount } from "wagmi";
-import { BugAntIcon, MagnifyingGlassIcon } from "@heroicons/react/24/outline";
-import { Address } from "~~/components/scaffold-eth";
+// import { BugAntIcon, MagnifyingGlassIcon } from "@heroicons/react/24/outline";
+// import { Address } from "~~/components/scaffold-eth";
+import { RainbowKitCustomConnectButton } from "~~/components/scaffold-eth";
+
+interface FramePage {
+  question: string;
+  options: string[];
+}
+
+// interface FrameData {
+//   frame: {
+//     name: string;
+//     pages: FramePage[];
+//   };
+//   owner: string;
+// }
+
+interface FrameData {
+  frame: {
+    name: string;
+    pages: FramePage[];
+    [key: string]: any;
+  };
+  owner: string;
+}
+
+// const frameData = {
+//   frame: {
+//     name: "Test",
+//     pages: [
+//       {
+//         question: "What is your name?",
+//         options: ["Alice", "Bob", "Charlie"],
+//       },
+//       {
+//         question: "What is your favorite color?",
+//         options: ["Red", "Green", "Blue"],
+//       },
+//       {
+//         question: "What is your favorite food?",
+//         options: ["Pizza", "Pasta", "Salad"],
+//       },
+//     ],
+//   },
+//   owner: "0x99ccAa5a770051C6ca30709E7c73204c7b10b8d9",
+// };
+
+const apiUrl = `http://${process.env.NEXT_PUBLIC_APP_API_URL}/frames`;
 
 const Home: NextPage = () => {
   const { address: connectedAddress } = useAccount();
 
+  const [frameData, setFrameData] = useState<FrameData>({
+    frame: {
+      name: "Test",
+      pages: [
+        { question: "What is your name?", options: ["Alice", "Bob", "Charlie"] },
+        { question: "What is your favorite color?", options: ["Red", "Green", "Blue"] },
+        { question: "What is your favorite food?", options: ["Pizza", "Pasta", "Salad"] },
+      ],
+    },
+    owner: "0x99ccAa5a770051C6ca30709E7c73204c7b10b8d9",
+  });
+
+  const handleChange = (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { name, value } = event.target;
+
+    // Update frameData based on the changed field
+    setFrameData(prevData => {
+      const updatedFrameData = { ...prevData };
+      const path = name.split("."); // Split name to access nested properties
+
+      // Update nested properties using reduce
+      updatedFrameData.frame = path.reduce((acc, prop, index, arr) => {
+        if (index === arr.length - 1) {
+          return { ...acc, [prop]: value }; // Update final property
+        }
+        return acc[prop]; // Traverse nested objects
+      }, updatedFrameData.frame); // Initial accumulator
+
+      return updatedFrameData;
+    });
+  };
+
+  const createFrame = async () => {
+    try {
+      console.log(apiUrl);
+      const response = await axios.post(apiUrl, frameData);
+      console.log("Frame created successfully:", response.data);
+    } catch (error) {
+      console.error("Error creating frame:", error);
+    }
+  };
+
   return (
     <>
       <div className="flex items-center flex-col flex-grow pt-10">
-        <div className="px-5">
-          <h1 className="text-center">
-            <span className="block text-2xl mb-2">Welcome to</span>
-            <span className="block text-4xl font-bold">Scaffold-ETH 2</span>
-          </h1>
-          <div className="flex justify-center items-center space-x-2">
-            <p className="my-2 font-medium">Connected Address:</p>
-            <Address address={connectedAddress} />
-          </div>
-          <p className="text-center text-lg">
-            Get started by editing{" "}
-            <code className="italic bg-base-300 text-base font-bold max-w-full break-words break-all inline-block">
-              packages/nextjs/app/page.tsx
-            </code>
-          </p>
-          <p className="text-center text-lg">
-            Edit your smart contract{" "}
-            <code className="italic bg-base-300 text-base font-bold max-w-full break-words break-all inline-block">
-              YourContract.sol
-            </code>{" "}
-            in{" "}
-            <code className="italic bg-base-300 text-base font-bold max-w-full break-words break-all inline-block">
-              packages/hardhat/contracts
-            </code>
-          </p>
-        </div>
-
-        <div className="flex-grow bg-base-300 w-full mt-16 px-8 py-12">
-          <div className="flex justify-center items-center gap-12 flex-col sm:flex-row">
-            <div className="flex flex-col bg-base-100 px-10 py-10 text-center items-center max-w-xs rounded-3xl">
-              <BugAntIcon className="h-8 w-8 fill-secondary" />
-              <p>
-                Tinker with your smart contract using the{" "}
-                <Link href="/debug" passHref className="link">
-                  Debug Contracts
-                </Link>{" "}
-                tab.
-              </p>
+        {connectedAddress ? (
+          <div>
+            <div>
+              <div className="text-center text-lg border border-white px-4 py-2 rounded-xl">
+                Connected with <span className="text-center text-lg font-bold">{connectedAddress}</span>
+              </div>
+              {/* <div onClick={createFrame}>GENERATE</div> */}
+              {apiUrl}
             </div>
-            <div className="flex flex-col bg-base-100 px-10 py-10 text-center items-center max-w-xs rounded-3xl">
-              <MagnifyingGlassIcon className="h-8 w-8 fill-secondary" />
-              <p>
-                Explore your local transactions with the{" "}
-                <Link href="/blockexplorer" passHref className="link">
-                  Block Explorer
-                </Link>{" "}
-                tab.
-              </p>
+            <div className="text-center text-lg mt-4">
+              <h2 className="text-xl">Create Frame Poll</h2>
+              <div className="flex flex-col border border-white px-4 py-2 rounded-xl">
+                <form className="flex flex-col justify-evenly">
+                  {/* Form fields to update frameData properties */}
+                  <label htmlFor="frameName">Frame Name:</label>
+                  <input
+                    type="text"
+                    id="frameName"
+                    name="frame.name"
+                    value={frameData.frame.name}
+                    onChange={handleChange}
+                  />
+                  {/* Add similar fields for each page and its properties (question, options) */}
+                  <button type="button" className="bg-secondary rounded-xl px-2 py-1 font-bold" onClick={createFrame}>
+                    Create Frame
+                  </button>
+                </form>
+              </div>
             </div>
           </div>
-        </div>
+        ) : (
+          <div className="flex flex-col mx-auto">
+            <div className="flex flex-row mx-auto">
+              <p className="text-center text-lg">You need to authenticate in order to use the dashboard</p>
+            </div>
+            <RainbowKitCustomConnectButton />
+          </div>
+        )}
       </div>
     </>
   );
